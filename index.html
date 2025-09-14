@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Egg</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+  </head>
+
+  <body>
+    <div
+      class="modal fade"
+      id="validation-modal"
+      tabindex="-1"
+      aria-labelledby="validation-modal-label"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Input validation errors</h5>
+          </div>
+          <div id="validation-modal-body" class="modal-body">
+            Errors will be here
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <h1 class="text-center my-5">The Egg - balatro seed searcher</h1>
+
+      <div class="border border-4 rounded px-2 mb-2">
+        <h3 class="text-center my-2">Legendaries</h3>
+        <div id="add-legendary-toolbar" class="btn-toolbar">
+          <button
+            class="btn btn-secondary dropdown-toggle mb-2 me-2"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            Add legendary
+          </button>
+          <ul id="add-legendary-menu" class="dropdown-menu"></ul>
+
+          <div
+            id="legendary-negatives-input-group"
+            class="input-group mb-2 me-2"
+          >
+            <div class="input-group-text">Negatives</div>
+            <input
+              type="number"
+              id="legendary-negatives"
+              class="form-control"
+              style="max-width: 75px"
+              value="0"
+              oninput="validateInputUint(this)"
+            />
+          </div>
+          <div id="legendary-ante-input-group" class="input-group mb-2 me-2">
+            <div class="input-group-text">Max ante</div>
+            <input
+              type="number"
+              id="legendary-ante"
+              class="form-control"
+              style="max-width: 75px"
+              value="0"
+              oninput="validateInputUint(this)"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="border border-4 rounded px-2 mb-2">
+        <h3 class="text-center my-2">Vouchers</h3>
+        <div id="add-voucher-toolbar" class="btn-toolbar">
+          <div class="input-group mb-2 me-2">
+            <div class="input-group-text">Add voucher</div>
+            <input
+              type="search"
+              class="form-control"
+              placeholder="Type to filter..."
+              style="min-width: 150px"
+              oninput="findVoucher(this.value)"
+            />
+            <input
+              type="text"
+              id="add-voucher-suggestion"
+              class="form-control"
+              style="min-width: 150px"
+              disabled
+            />
+            <button
+              id="add-voucher-button"
+              class="btn btn-secondary"
+              type="button"
+              onclick="addVoucher()"
+              disabled
+            >
+              +
+            </button>
+          </div>
+          <div id="voucher-ante-input-group" class="input-group mb-2 me-2">
+            <div class="input-group-text">Max ante</div>
+            <input
+              type="number"
+              id="voucher-ante"
+              class="form-control"
+              style="max-width: 75px"
+              value="0"
+              oninput="validateInputUint(this)"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="border border-4 rounded px-2 mb-2">
+        <h3 class="text-center my-2">First buffoon pack (one of)</h3>
+        <div id="add-joker-pack-toolbar" class="btn-toolbar">
+          <div class="input-group mb-2 me-2">
+            <div class="input-group-text">Add joker</div>
+            <input
+              type="search"
+              class="form-control"
+              placeholder="Type to filter..."
+              style="min-width: 150px"
+              oninput="findJokerPack(this.value)"
+            />
+            <input
+              type="text"
+              id="add-joker-pack-suggestion"
+              class="form-control"
+              style="min-width: 150px"
+              disabled
+            />
+            <button
+              id="add-joker-pack-button"
+              class="btn btn-secondary"
+              type="button"
+              onclick="addJokerPack()"
+              disabled
+            >
+              +
+            </button>
+          </div>
+          <div
+            id="joker-pack-negative-input-group"
+            class="input-group mb-2 me-2"
+          >
+            <div class="input-group-text">Negative</div>
+            <div class="input-group-text">
+              <input
+                type="checkbox"
+                id="joker-pack-negative"
+                class="form-check-input mt-0"
+              />
+            </div>
+          </div>
+          <div id="joker-pack-ankh-input-group" class="input-group mb-2 me-2">
+            <div class="input-group-text">Ankh in next pack</div>
+            <div class="input-group-text">
+              <input
+                type="checkbox"
+                id="joker-pack-ankh"
+                class="form-check-input mt-0"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="border border-4 rounded px-2 mb-2">
+        <h3 class="text-center my-2">Jokers in shop</h3>
+        <div id="add-joker-shop-toolbar" class="btn-toolbar">
+          <div class="input-group mb-2 me-2">
+            <div class="input-group-text">Add joker</div>
+            <input
+              type="search"
+              class="form-control"
+              placeholder="Type to filter..."
+              style="min-width: 150px"
+              oninput="findJokerShop(this.value)"
+            />
+            <input
+              type="text"
+              id="add-joker-shop-suggestion"
+              class="form-control"
+              style="min-width: 150px"
+              disabled
+            />
+            <button
+              id="add-joker-shop-button"
+              class="btn btn-secondary"
+              type="button"
+              onclick="addJokerShop()"
+              disabled
+            >
+              +
+            </button>
+          </div>
+          <div id="joker-shop-ante-input-group" class="input-group mb-2 me-2">
+            <div class="input-group-text">Max ante</div>
+            <input
+              type="number"
+              id="joker-shop-ante"
+              class="form-control"
+              style="max-width: 75px"
+              value="0"
+              oninput="validateInputUint(this)"
+            />
+          </div>
+        </div>
+      </div>
+
+      <hr class="border border-secondary border-2 opacity-50 w-75 mx-auto" />
+
+      <div
+        id="search"
+        class="d-flex flex-column justify-content-center text-center"
+      ></div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+      crossorigin="anonymous"
+    ></script>
+    <script src="workers-parent.js"></script>
+    <script>
+      const legendaryJokers = [
+        "Canio",
+        "Triboulet",
+        "Yorick",
+        "Chicot",
+        "Perkeo",
+      ];
+
+      const vouchers = [
+        "Overstock",
+        "Overstock Plus",
+        "Clearance Sale",
+        "Liquidation",
+        "Hone",
+        "Glow Up",
+        "Reroll Surplus",
+        "Reroll Glut",
+        "Crystal Ball",
+        "Omen Globe",
+        "Telescope",
+        "Observatory",
+        "Grabber",
+        "Nacho Tong",
+        "Wasteful",
+        "Recyclomancy",
+        "Tarot Merchant",
+        "Tarot Tycoon",
+        "Planet Merchant",
+        "Planet Tycoon",
+        "Seed Money",
+        "Money Tree",
+        "Blank",
+        "Antimatter",
+        "Magic Trick",
+        "Illusion",
+        "Hieroglyph",
+        "Petroglyph",
+        "Director's Cut",
+        "Retcon",
+        "Paint Brush",
+        "Palette",
+      ];
+
+      const skippedVouchers = [
+        "Tarot Tycoon",
+        "Planet Merchant",
+        "Magic Trick",
+      ];
+
+      const unsupportedVouchers = skippedVouchers.flatMap((voucher) => {
+        const res = [voucher];
+        const voucherId = vouchers.indexOf(voucher);
+        if (voucherId % 2 == 0) res.push(vouchers[voucherId + 1]);
+        return res;
+      });
+
+      const commonJokers = [
+        "Joker",
+        "Greedy Joker",
+        "Lusty Joker",
+        "Wrathful Joker",
+        "Gluttonous Joker",
+        "Jolly Joker",
+        "Zany Joker",
+        "Mad Joker",
+        "Crazy Joker",
+        "Droll Joker",
+        "Sly Joker",
+        "Wily Joker",
+        "Clever Joker",
+        "Devious Joker",
+        "Crafty Joker",
+        "Half Joker",
+        "Credit Card",
+        "Banner",
+        "Mystic Summit",
+        "8 Ball",
+        "Misprint",
+        "Raised Fist",
+        "Chaos the Clown",
+        "Scary Face",
+        "Abstract Joker",
+        "Delayed Gratification",
+        "Gros Michel",
+        "Even Steven",
+        "Odd Todd",
+        "Scholar",
+        "Business Card",
+        "Supernova",
+        "Ride the Bus",
+        "Egg",
+        "Runner",
+        "Ice Cream",
+        "Splash",
+        "Blue Joker",
+        "Faceless Joker",
+        "Green Joker",
+        "Superposition",
+        "To Do List",
+        "Cavendish",
+        "Red Card",
+        "Square Joker",
+        "Riff-raff",
+        "Photograph",
+        "Reserved Parking",
+        "Mail In Rebate",
+        "Hallucination",
+        "Fortune Teller",
+        "Juggler",
+        "Drunkard",
+        "Golden Joker",
+        "Popcorn",
+        "Walkie Talkie",
+        "Smiley Face",
+        "Golden Ticket",
+        "Swashbuckler",
+        "Hanging Chad",
+        "Shoot the Moon",
+      ];
+
+      const uncommonJokers = [
+        "Joker Stencil",
+        "Four Fingers",
+        "Mime",
+        "Ceremonial Dagger",
+        "Marble Joker",
+        "Loyalty Card",
+        "Dusk",
+        "Fibonacci",
+        "Steel Joker",
+        "Hack",
+        "Pareidolia",
+        "Space Joker",
+        "Burglar",
+        "Blackboard",
+        "Sixth Sense",
+        "Constellation",
+        "Hiker",
+        "Card Sharp",
+        "Madness",
+        "Seance",
+        "Vampire",
+        "Shortcut",
+        "Hologram",
+        "Cloud 9",
+        "Rocket",
+        "Midas Mask",
+        "Luchador",
+        "Gift Card",
+        "Turtle Bean",
+        "Erosion",
+        "To the Moon",
+        "Stone Joker",
+        "Lucky Cat",
+        "Bull",
+        "Diet Cola",
+        "Trading Card",
+        "Flash Card",
+        "Spare Trousers",
+        "Ramen",
+        "Seltzer",
+        "Castle",
+        "Mr. Bones",
+        "Acrobat",
+        "Sock and Buskin",
+        "Troubadour",
+        "Certificate",
+        "Smeared Joker",
+        "Throwback",
+        "Rough Gem",
+        "Bloodstone",
+        "Arrowhead",
+        "Onyx Agate",
+        "Glass Joker",
+        "Showman",
+        "Flower Pot",
+        "Merry Andy",
+        "Oops! All 6s",
+        "The Idol",
+        "Seeing Double",
+        "Matador",
+        "Satellite",
+        "Cartomancer",
+        "Astronomer",
+        "Bootstraps",
+      ];
+
+      const rareJokers = [
+        "DNA",
+        "Vagabond",
+        "Baron",
+        "Obelisk",
+        "Baseball Card",
+        "Ancient Joker",
+        "Campfire",
+        "Blueprint",
+        "Wee Joker",
+        "Hit the Road",
+        "The Duo",
+        "The Trio",
+        "The Family",
+        "The Order",
+        "The Tribe",
+        "Stuntman",
+        "Invisible Joker",
+        "Brainstorm",
+        "Drivers License",
+        "Burnt Joker",
+      ];
+
+      const nonLegendaryJokers = commonJokers.concat(
+        uncommonJokers,
+        rareJokers
+      );
+
+      (function onLoad() {
+        setupLegendariesDropdown(legendaryJokers);
+        setupSearchButton();
+      })();
+
+      function setupLegendariesDropdown(jokers) {
+        const dropdownMenu = document.getElementById("add-legendary-menu");
+        jokers.forEach((joker) => {
+          const jokerAsId = formatAsId(joker);
+          const newElem = `
+            <li>
+              <button
+                id="${jokerAsId}"
+                class="dropdown-item"
+                type="button"
+                onclick="addLegendary('${joker}')"
+              >
+                ${joker}
+              </button>
+            </li>
+          `;
+          dropdownMenu.insertAdjacentHTML("beforeend", newElem);
+        });
+      }
+
+      function setupSearchButton() {
+        const searchDiv = document.getElementById("search");
+        const newElem = `
+          <button
+            class="btn btn-primary mx-auto mb-2"
+            type="button"
+            onclick="search(this)"
+          >
+            Search
+          </button>
+        `;
+        searchDiv.insertAdjacentHTML("beforeend", newElem);
+      }
+
+      function setupCancelButton() {
+        const searchDiv = document.getElementById("search");
+        const newElem = `
+          <button
+            id="cancel-button"
+            class="btn btn-primary mx-auto mb-2"
+            type="button"
+            onclick="cancel()"
+          >
+            Cancel
+          </button>
+        `;
+        searchDiv.insertAdjacentHTML("beforeend", newElem);
+      }
+
+      function removeCancelButton() {
+        const button = document.getElementById("cancel-button");
+        if (button) button.remove();
+      }
+
+      function setupSearchStatusBar() {
+        const searchDiv = document.getElementById("search");
+        const newElem = `
+          <div id="search-status" class="mb-2">
+            Tries: 0; Time: 0s; Rate: 0 per sec
+          </div>
+        `;
+        searchDiv.insertAdjacentHTML("afterbegin", newElem);
+      }
+
+      function removeSearchStatusBar() {
+        const searchStatusBar = document.getElementById("search-status");
+        if (searchStatusBar) searchStatusBar.remove();
+      }
+
+      function insertIntoSearchStatusBar(tries, time) {
+        const searchStatusBar = document.getElementById("search-status");
+        searchStatusBar.innerHTML = `Tries: ${tries}; Time: ${time}s; Rate: ${(
+          tries / time
+        ).toFixed(0)} per sec`;
+      }
+
+      function setupSearchResultArea(result) {
+        const searchDiv = document.getElementById("search");
+        const newElem = `
+          <table id="search-result" class="table table-bordered mb-2">
+            <thead>
+              <tr>
+                <th scope="col">Param</th>
+                <th scope="col">Result</th>
+                <th scope="col">Extra</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Tries</td>
+                <td>${result.tries}</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td>Time</td>
+                <td>${result.time}s</td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td>Seed</td>
+                <td>
+                  <a
+                    role="button"
+                    tabindex="0"
+                    class="link-underline link-underline-opacity-0"
+                    onclick="navigator.clipboard.writeText(this.innerHTML.trim())"
+                  >
+                    ${result.seed}
+                  </a>
+                </td>
+                <td>-</td>
+              </tr>
+              <tr>
+                <td>Legendaries</td>
+                <td>
+                  ${
+                    result.legendariesPacks
+                      .map((elem, i) =>
+                        i % 2 == 0
+                          ? `<div>Ante: ${elem}, `
+                          : `Pack: ${elem}</div>`
+                      )
+                      .join("") || "-"
+                  }
+                </td>
+                <td>
+                  On ante buy every previous pack of the same type (only small
+                  ones), 1st ante excludes 1st pack (its always buffoon)
+                </td>
+              </tr>
+              <tr>
+                <td>Voucher antes</td>
+                <td>${result.voucherAntes.join(", ") || "-"}</td>
+                <td>
+                  Starting from ante 2 buy every voucher except
+                  ${skippedVouchers.map((elem) => `"${elem}"`).join(", ")}
+                </td>
+              </tr>
+              <tr>
+                <td>Jokers in shop</td>
+                <td>
+                  ${
+                    result.jokerShopIds
+                      .map((elem, i) =>
+                        i % 2 == 0 ? `<div>Ante: ${elem}, ` : `#${elem}</div>`
+                      )
+                      .join("") || "-"
+                  }
+                </td>
+                <td>-</td>
+              </tr>
+            </tbody>
+          </table>
+        `;
+        searchDiv.insertAdjacentHTML("afterbegin", newElem);
+      }
+
+      function removeSearchResultArea() {
+        const searchResultArea = document.getElementById("search-result");
+        if (searchResultArea) searchResultArea.remove();
+      }
+
+      function addLegendary(joker) {
+        const jokerAsId = formatAsId(joker);
+        const dropdownItem = document.getElementById(jokerAsId);
+        dropdownItem.remove();
+
+        const newElem = `
+          <div id="${jokerAsId}" class="btn-group mb-2 me-2">
+            <button class="btn btn-secondary legendary" type="button" disabled>
+              ${joker}
+            </button>
+            <button
+              class="btn btn-secondary"
+              type="button"
+              onclick="removeLegendary('${joker}')"
+            >
+              X
+            </button>
+          </div>
+        `;
+
+        const negativesInputGroup = document.getElementById(
+          "legendary-negatives-input-group"
+        );
+        negativesInputGroup.insertAdjacentHTML("beforebegin", newElem);
+      }
+
+      function removeLegendary(joker) {
+        const jokerAsId = formatAsId(joker);
+        const jokerElem = document.getElementById(jokerAsId);
+        jokerElem.remove();
+
+        setupLegendariesDropdown([joker]);
+      }
+
+      function addVoucher() {
+        const voucherSuggestionItem = document.getElementById(
+          "add-voucher-suggestion"
+        );
+        const addVoucherButton = document.getElementById("add-voucher-button");
+        const voucher = voucherSuggestionItem.placeholder;
+        voucherSuggestionItem.placeholder = "";
+        addVoucherButton.disabled = true;
+
+        const voucherAsId = formatAsId(voucher);
+        const newElem = `
+          <div id="${voucherAsId}" class="btn-group mb-2 me-2">
+            <button class="btn btn-secondary voucher" type="button" disabled>
+              ${voucher}
+            </button>
+            <button
+              class="btn btn-secondary"
+              type="button"
+              onclick="removeVoucher('${voucherAsId}')"
+            >
+              X
+            </button>
+          </div>
+        `;
+
+        const anteInputGroup = document.getElementById(
+          "voucher-ante-input-group"
+        );
+        anteInputGroup.insertAdjacentHTML("beforebegin", newElem);
+      }
+
+      function removeVoucher(voucherAsId) {
+        const voucherElem = document.getElementById(voucherAsId);
+        voucherElem.remove();
+      }
+
+      function findVoucher(searchStr) {
+        const res =
+          searchStr.length > 0
+            ? vouchers.find(
+                (voucher) =>
+                  voucher.toLowerCase().startsWith(searchStr.toLowerCase()) &&
+                  !document.getElementById(formatAsId(voucher))
+              )
+            : null;
+        const voucherSuggestionItem = document.getElementById(
+          "add-voucher-suggestion"
+        );
+        const addVoucherButton = document.getElementById("add-voucher-button");
+        if (res) {
+          voucherSuggestionItem.placeholder = res;
+          addVoucherButton.disabled = false;
+        } else {
+          voucherSuggestionItem.placeholder = "";
+          addVoucherButton.disabled = true;
+        }
+      }
+
+      function addJokerPack() {
+        const jokerSuggestionItem = document.getElementById(
+          "add-joker-pack-suggestion"
+        );
+        const addJokerButton = document.getElementById("add-joker-pack-button");
+        const joker = jokerSuggestionItem.placeholder;
+        jokerSuggestionItem.placeholder = "";
+        addJokerButton.disabled = true;
+
+        const jokerAsId = `joker-pack-${formatAsId(joker)}`;
+        const newElem = `
+          <div id="${jokerAsId}" class="btn-group mb-2 me-2">
+            <button class="btn btn-secondary joker-pack" type="button" disabled>
+              ${joker}
+            </button>
+            <button
+              class="btn btn-secondary"
+              type="button"
+              onclick="removeJokerPack('${jokerAsId}')"
+            >
+              X
+            </button>
+          </div>
+        `;
+
+        const negativeInputGroup = document.getElementById(
+          "joker-pack-negative-input-group"
+        );
+        negativeInputGroup.insertAdjacentHTML("beforebegin", newElem);
+      }
+
+      function removeJokerPack(jokerAsId) {
+        const jokerElem = document.getElementById(jokerAsId);
+        jokerElem.remove();
+      }
+
+      function findJokerPack(searchStr) {
+        const res =
+          searchStr.length > 0
+            ? nonLegendaryJokers.find(
+                (joker) =>
+                  joker.toLowerCase().startsWith(searchStr.toLowerCase()) &&
+                  !document.getElementById(`joker-pack-${formatAsId(joker)}`)
+              )
+            : null;
+        const jokerSuggestionItem = document.getElementById(
+          "add-joker-pack-suggestion"
+        );
+        const addJokerButton = document.getElementById("add-joker-pack-button");
+        if (res) {
+          jokerSuggestionItem.placeholder = res;
+          addJokerButton.disabled = false;
+        } else {
+          jokerSuggestionItem.placeholder = "";
+          addJokerButton.disabled = true;
+        }
+      }
+
+      function addJokerShop() {
+        const jokerSuggestionItem = document.getElementById(
+          "add-joker-shop-suggestion"
+        );
+        const addJokerButton = document.getElementById("add-joker-shop-button");
+        const joker = jokerSuggestionItem.placeholder;
+        jokerSuggestionItem.placeholder = "";
+        addJokerButton.disabled = true;
+
+        const jokerAsId = `joker-shop-${formatAsId(joker)}`;
+        const newElem = `
+          <div id="${jokerAsId}" class="btn-group mb-2 me-2">
+            <button class="btn btn-secondary joker-shop" type="button" disabled>
+              ${joker}
+            </button>
+            <button
+              class="btn btn-secondary"
+              type="button"
+              onclick="removeJokerShop('${jokerAsId}')"
+            >
+              X
+            </button>
+          </div>
+        `;
+
+        const anteInputGroup = document.getElementById(
+          "joker-shop-ante-input-group"
+        );
+        anteInputGroup.insertAdjacentHTML("beforebegin", newElem);
+      }
+
+      function removeJokerShop(jokerAsId) {
+        const jokerElem = document.getElementById(jokerAsId);
+        jokerElem.remove();
+      }
+
+      function findJokerShop(searchStr) {
+        const res =
+          searchStr.length > 0
+            ? nonLegendaryJokers.find(
+                (joker) =>
+                  joker.toLowerCase().startsWith(searchStr.toLowerCase()) &&
+                  !document.getElementById(`joker-shop-${formatAsId(joker)}`)
+              )
+            : null;
+        const jokerSuggestionItem = document.getElementById(
+          "add-joker-shop-suggestion"
+        );
+        const addJokerButton = document.getElementById("add-joker-shop-button");
+        if (res) {
+          jokerSuggestionItem.placeholder = res;
+          addJokerButton.disabled = false;
+        } else {
+          jokerSuggestionItem.placeholder = "";
+          addJokerButton.disabled = true;
+        }
+      }
+
+      function validateInputUint(e) {
+        const regex = /^\d*$/;
+        const res = new RegExp(regex).exec(e.value);
+        if (!res) e.value = "0";
+      }
+
+      function formatAsId(str) {
+        return str.toLowerCase().replaceAll(" ", "-").replaceAll("'", "");
+      }
+
+      let updateStatusIntevalId = null;
+
+      function search(e) {
+        e.remove();
+        removeSearchResultArea();
+
+        let errorStr = "";
+
+        const legendaryElems = document.getElementsByClassName("legendary");
+        const legendaries = [];
+        for (let i = 0; i < legendaryElems.length; i++) {
+          legendaries.push(legendaryElems.item(i).innerHTML.trim());
+        }
+        let legendaryNegatives;
+        let legendaryAnte;
+        if (legendaries.length == 0) {
+          legendaryNegatives = 0;
+          legendaryAnte = 0;
+        } else {
+          legendaryNegatives = Number(
+            document.getElementById("legendary-negatives").value
+          );
+          if (legendaryNegatives > legendaries.length) {
+            errorStr += `- Legendaries: can't set more negatives than jokers <br />`;
+          }
+          legendaryAnte = Number(
+            document.getElementById("legendary-ante").value
+          );
+          if (legendaryAnte == 0) {
+            errorStr += `- Legendaries: max ante should be minimum 1st <br />`;
+          }
+        }
+
+        const voucherElems = document.getElementsByClassName("voucher");
+        const vouchers = [];
+        for (let i = 0; i < voucherElems.length; i++) {
+          const voucher = voucherElems.item(i).innerHTML.trim();
+          vouchers.push(voucher);
+          if (unsupportedVouchers.includes(voucher)) {
+            errorStr += `- Vouchers: ${unsupportedVouchers
+              .map((unsuppVoucher) => `"${unsuppVoucher}"`)
+              .join(
+                ", "
+              )} are not supported, since they are configured to be skipped <br />`;
+            break;
+          }
+        }
+        let voucherAnte;
+        if (vouchers.length == 0) {
+          voucherAnte = 0;
+        } else {
+          voucherAnte = Number(document.getElementById("voucher-ante").value);
+          if (voucherAnte < 2) {
+            errorStr += `- Vouchers: max ante should be minimum 2nd <br />`;
+          }
+        }
+
+        const jokerPackElems = document.getElementsByClassName("joker-pack");
+        const jokersPack = [];
+        for (let i = 0; i < jokerPackElems.length; i++) {
+          jokersPack.push(jokerPackElems.item(i).innerHTML.trim());
+        }
+        let jokerPackNegative;
+        let jokerPackAnkh;
+        if (jokersPack.length == 0) {
+          jokerPackNegative = false;
+          jokerPackAnkh = false;
+        } else {
+          jokerPackNegative = document.getElementById(
+            "joker-pack-negative"
+          ).checked;
+          jokerPackAnkh = document.getElementById("joker-pack-ankh").checked;
+        }
+
+        const jokerShopElems = document.getElementsByClassName("joker-shop");
+        const jokersShop = [];
+        for (let i = 0; i < jokerShopElems.length; i++) {
+          jokersShop.push(jokerShopElems.item(i).innerHTML.trim());
+        }
+        let jokerShopAnte;
+        if (jokersShop.length == 0) {
+          jokerShopAnte = 0;
+        } else {
+          jokerShopAnte = Number(
+            document.getElementById("joker-shop-ante").value
+          );
+          if (jokerShopAnte < 2) {
+            errorStr += `- Jokers in shop: max ante should be minimum 2nd <br />`;
+          }
+        }
+
+        if (errorStr.length > 0) {
+          const modalBody = document.getElementById("validation-modal-body");
+          modalBody.innerHTML = errorStr;
+          const modal = new bootstrap.Modal(
+            document.getElementById("validation-modal")
+          );
+          modal.show();
+
+          searchCleanup();
+
+          return;
+        }
+
+        runTaskWithWorkers([
+          jokersPack,
+          jokerPackNegative,
+          jokerPackAnkh,
+          legendaries,
+          legendaryNegatives,
+          legendaryAnte,
+          vouchers,
+          voucherAnte,
+          jokersShop,
+          jokerShopAnte,
+        ]).then((taskResult) => {
+          setupSearchResultArea(taskResult);
+          searchCleanup();
+        });
+
+        setupSearchStatusBar();
+        updateStatusIntevalId = setInterval(() => {
+          const searchStatus = taskStatus();
+          insertIntoSearchStatusBar(searchStatus.tries, searchStatus.timeSpent);
+        }, 1000);
+
+        setupCancelButton();
+      }
+
+      function searchCleanup() {
+        removeCancelButton();
+        clearInterval(updateStatusIntevalId);
+        updateStatusIntevalId = null;
+        removeSearchStatusBar();
+        setupSearchButton();
+      }
+
+      function cancel() {
+        stopWorkers();
+        searchCleanup();
+      }
+    </script>
+  </body>
+</html>
